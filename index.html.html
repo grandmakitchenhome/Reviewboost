@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReviewBoost — Get More Google Reviews</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f2eb;
+    --cream: #fffdf7;
+    --gold: #e8a020;
+    --gold-light: #fdf3dc;
+    --gold-dark: #b87a10;
+    --green: #1a6b3c;
+    --green-light: #e8f5ee;
+    --red: #c0392b;
+    --muted: #7a7570;
+    --border: #e0dbd0;
+    --shadow: 0 2px 12px rgba(13,13,13,0.08);
+    --shadow-lg: 0 8px 40px rgba(13,13,13,0.14);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+  h1,h2,h3,h4 { font-family: 'Syne', sans-serif; }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; min-height: 100vh; }
+  .view.active { display: block; }
+
+  /* ─── NAV ─── */
+  nav {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; cursor: pointer; letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 8px; align-items: center; }
+  .btn { font-family: 'DM Sans', sans-serif; font-weight: 500; border: none; cursor: pointer; border-radius: 8px; transition: all .18s; font-size: 14px; }
+  .btn-ghost { background: transparent; color: var(--ink); padding: 8px 16px; }
+  .btn-ghost:hover { background: var(--gold-light); }
+  .btn-primary { background: var(--gold); color: var(--ink); padding: 10px 20px; font-weight: 600; }
+  .btn-primary:hover { background: var(--gold-dark); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(232,160,32,0.3); }
+  .btn-secondary { background: var(--ink); color: var(--cream); padding: 10px 20px; font-weight: 600; }
+  .btn-secondary:hover { background: #333; transform: translateY(-1px); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); padding: 9px 18px; }
+  .btn-outline:hover { border-color: var(--ink); }
+  .btn-lg { padding: 14px 28px; font-size: 16px; border-radius: 10px; }
+  .btn-green { background: var(--green); color: #fff; padding: 12px 24px; font-weight: 600; border-radius: 10px; }
+  .btn-green:hover { background: #145530; transform: translateY(-1px); }
+
+  /* ─── LANDING ─── */
+  #landing { background: var(--paper); }
+  .hero {
+    max-width: 960px; margin: 0 auto;
+    padding: 80px 32px 60px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold-light); border: 1px solid #f0c060;
+    border-radius: 100px; padding: 6px 14px; font-size: 13px;
+    font-weight: 500; color: var(--gold-dark); margin-bottom: 20px;
+  }
+  .hero-badge::before { content: '★'; font-size: 12px; }
+  .hero h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 20px; }
+  .hero h1 em { font-style: normal; color: var(--gold); }
+  .hero p { font-size: 17px; line-height: 1.65; color: #4a4540; margin-bottom: 32px; font-weight: 300; }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .hero-note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+  .hero-visual {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+  }
+  .mock-phone {
+    background: #fff;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+  }
+  .mock-phone-bar { background: var(--ink); padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+  .mock-phone-bar span { width: 8px; height: 8px; border-radius: 50%; background: #555; display: inline-block; }
+  .mock-phone-bar span:first-child { background: #ff5f57; }
+  .mock-phone-bar span:nth-child(2) { background: #febc2e; }
+  .mock-phone-bar span:nth-child(3) { background: #28c840; }
+  .mock-content { padding: 20px; }
+  .mock-q { font-size: 13px; font-weight: 600; margin-bottom: 10px; font-family: 'Syne', sans-serif; }
+  .mock-stars { display: flex; gap: 4px; margin-bottom: 16px; }
+  .mock-star { font-size: 24px; cursor: pointer; transition: transform .1s; }
+  .mock-star:hover { transform: scale(1.2); }
+  .mock-review-box { background: var(--gold-light); border-radius: 10px; padding: 14px; font-size: 12px; line-height: 1.6; color: #555; margin-bottom: 14px; border: 1px solid #f0d090; }
+  .mock-post-btn { width: 100%; padding: 10px; background: #4285f4; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .mock-badge { position: absolute; top: -14px; right: 20px; background: var(--green); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 100px; font-family: 'Syne', sans-serif; }
+
+  /* HOW IT WORKS */
+  .section { max-width: 960px; margin: 0 auto; padding: 64px 32px; }
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dark); margin-bottom: 12px; }
+  .section h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -1px; margin-bottom: 48px; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .step { position: relative; }
+  .step-num { width: 40px; height: 40px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; margin-bottom: 14px; }
+  .step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .step p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* PRICING */
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 640px; }
+  .pricing-card { background: var(--cream); border: 1.5px solid var(--border); border-radius: 16px; padding: 32px; }
+  .pricing-card.featured { border-color: var(--gold); background: var(--gold-light); }
+  .pricing-tag { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-dark); margin-bottom: 8px; }
+  .pricing-amount { font-family: 'Syne', sans-serif; font-size: 42px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .pricing-amount span { font-size: 16px; font-weight: 400; color: var(--muted); }
+  .pricing-desc { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+  .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .pricing-features li { font-size: 14px; display: flex; gap: 8px; align-items: flex-start; }
+  .pricing-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 32px; text-align: center; font-size: 13px; color: var(--muted); }
+
+  /* ─── DASHBOARD ─── */
+  #dashboard { background: var(--paper); }
+  .dash-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 64px); }
+  .dash-sidebar { background: var(--cream); border-right: 1px solid var(--border); padding: 24px 16px; }
+  .dash-biz-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .dash-biz-sub { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+  .dash-nav { display: flex; flex-direction: column; gap: 2px; }
+  .dash-nav-item { padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all .15s; color: var(--muted); }
+  .dash-nav-item:hover { background: var(--gold-light); color: var(--ink); }
+  .dash-nav-item.active { background: var(--gold-light); color: var(--ink); font-weight: 600; }
+  .dash-nav-item .icon { font-size: 16px; }
+  .dash-main { padding: 32px; overflow-y: auto; }
+  .dash-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+  .dash-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .dash-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; }
+  .stat-delta { font-size: 12px; color: var(--green); margin-top: 6px; }
+  .dash-panel { background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .dash-panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .review-link-box { display: flex; gap: 10px; align-items: center; }
+  .review-link-input { flex: 1; background: var(--paper); border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--muted); }
+  .review-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .review-row:last-child { border-bottom: none; }
+  .review-status { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .status-dot.posted { background: var(--green); }
+  .status-dot.pending { background: var(--gold); }
+  .status-dot.sent { background: #4285f4; }
+  .dash-panel-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .dash-tab { padding: 10px 16px; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); transition: all .15s; }
+  .dash-tab.active { border-color: var(--gold); color: var(--ink); font-weight: 600; }
+  .qr-box { width: 120px; height: 120px; background: var(--paper); border: 1.5px dashed var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); text-align: center; padding: 8px; }
+  .send-form { display: flex; flex-direction: column; gap: 12px; }
+  .send-input { border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; background: var(--paper); }
+  .send-input:focus { outline: none; border-color: var(--gold); }
+
+  /* ─── REVIEW FLOW ─── */
+  #reviewflow { background: var(--paper); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px; }
+  .flow-card { background: var(--cream); border: 1px solid var(--border); border-radius: 20px; padding: 40px; max-width: 480px; width: 100%; box-shadow: var(--shadow-lg); }
+  .flow-biz { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .flow-biz-icon { width: 48px; height: 48px; background: var(--gold); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .flow-biz-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
+  .flow-biz-type { font-size: 13px; color: var(--muted); }
+  .flow-step { display: none; }
+  .flow-step.active { display: block; animation: fadeUp .3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .flow-question { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .flow-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+  .stars-row { display: flex; gap: 8px; margin-bottom: 28px; }
+  .star-btn { font-size: 36px; cursor: pointer; transition: transform .15s, filter .15s; filter: grayscale(1); opacity: 0.3; background: none; border: none; padding: 0; }
+  .star-btn.lit { filter: none; opacity: 1; }
+  .star-btn:hover { transform: scale(1.15); }
+  .flow-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .flow-option { background: var(--paper); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 14px; cursor: pointer; transition: all .15s; text-align: center; font-weight: 500; }
+  .flow-option:hover { border-color: var(--gold); background: var(--gold-light); }
+  .flow-option.selected { border-color: var(--gold); background: var(--gold-light); font-weight: 600; }
+  .flow-textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.6; resize: vertical; min-height: 120px; background: var(--paper); }
+  .flow-textarea:focus { outline: none; border-color: var(--gold); }
+  .flow-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .flow-progress { display: flex; gap: 6px; align-items: center; }
+  .flow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background .2s; }
+  .flow-dot.done { background: var(--gold); }
+  .generated-review { background: var(--gold-light); border: 1px solid #f0d090; border-radius: 12px; padding: 18px; font-size: 15px; line-height: 1.7; margin-bottom: 20px; }
+  .google-btn { width: 100%; padding: 14px; background: #4285f4; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'DM Sans', sans-serif; transition: all .18s; }
+  .google-btn:hover { background: #3367d6; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(66,133,244,0.3); }
+  .google-g { width: 20px; height: 20px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #4285f4; }
+  .flow-loading { display: flex; align-items: center; gap: 12px; padding: 20px 0; font-size: 14px; color: var(--muted); }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .success-icon { font-size: 56px; text-align: center; margin-bottom: 16px; }
+  .success-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 10px; }
+  .success-sub { font-size: 15px; color: var(--muted); text-align: center; line-height: 1.6; }
+  .edit-btn { background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer; text-decoration: underline; margin-left: 4px; }
+  .edit-btn:hover { color: var(--ink); }
+
+  /* ─── MODAL / OVERLAY ─── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,13,13,0.5); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--cream); border-radius: 16px; padding: 32px; max-width: 440px; width: 90%; box-shadow: var(--shadow-lg); animation: fadeUp .25s ease; }
+  .modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; gap: 32px; }
+    .hero-visual { display: none; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .dash-layout { grid-template-columns: 1fr; }
+    .dash-sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAV
+═══════════════════════════════════════════ -->
+<nav id="main-nav">
+  <div class="nav-logo" onclick="showView('landing')">Review<span>Boost</span></div>
+  <div class="nav-links" id="nav-links">
+    <button class="btn btn-ghost" onclick="showView('landing')">Home</button>
+    <button class="btn btn-ghost" onclick="showSection('how')">How it works</button>
+    <button class="btn btn-ghost" onclick="showSection('pricing')">Pricing</button>
+    <button class="btn btn-outline" onclick="showView('reviewflow')">Demo Review Flow</button>
+    <button class="btn btn-primary" onclick="showView('dashboard')">Dashboard →</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     LANDING
+═══════════════════════════════════════════ -->
+<div id="landing" class="view active">
+
+  <div class="hero">
+    <div>
+      <div class="hero-badge">New way to get Google reviews</div>
+      <h1>Turn happy customers into <em>5-star reviews</em></h1>
+      <p>ReviewBoost helps your customers write and post a genuine Google review in under 60 seconds — no friction, no fuss. One flat monthly fee, unlimited requests.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary btn-lg" onclick="showView('dashboard')">Start for free →</button>
+        <button class="btn btn-outline btn-lg" onclick="showView('reviewflow')">See the customer flow</button>
+      </div>
+      <p class="hero-note">🔒 Limited offer: $9.99/month — regular price $34.99/mo. Lock in now.</p>
+    </div>
+    <div class="hero-visual">
+      <div class="mock-badge">⭐ Review posted!</div>
+      <div class="mock-phone">
+        <div class="mock-phone-bar">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="mock-content">
+          <div class="mock-q">How was your experience?</div>
+          <div class="mock-stars">
+            <span class="mock-star">⭐</span>
+            <span class="mock-star">⭐</span>
+            <span class="mock-star">⭐</span>
+            <span class="mock-star">⭐</span>
+            <span class="mock-star">⭐</span>
+          </div>
+          <div class="mock-review-box">
+            "Absolutely loved the service here. The staff was warm and attentive, and everything exceeded my expectations. Will definitely be coming back!"
+          </div>
+          <button class="mock-post-btn">
+            <div style="width:16px;height:16px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#4285f4">G</div>
+            Post to Google
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div style="background: var(--cream); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="section" id="how">
+      <div class="section-label">How it works</div>
+      <h2>Four steps to more reviews</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Sign up your business</h3>
+          <p>Add your business name, Google profile link, and get your unique review link in minutes.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Share your link</h3>
+          <p>Send it via text, email, or print a QR code for your counter. Works anywhere.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>AI writes the review</h3>
+          <p>Customers answer 3 quick questions. Our AI drafts a natural, personalized review they can tweak.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>One tap to Google</h3>
+          <p>They hit "Post to Google" and it's live. Unlimited requests included in your monthly plan.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section" id="pricing">
+    <div class="section-label">Pricing</div>
+    <h2>One simple plan. No surprises.</h2>
+
+    <div style="max-width:460px;">
+      <!-- Limited time banner -->
+      <div style="background:var(--ink);color:var(--cream);border-radius:12px 12px 0 0;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:var(--gold);color:var(--ink);font-weight:700;font-size:11px;padding:3px 9px;border-radius:100px;letter-spacing:.5px;">LIMITED TIME</span>
+          <span style="font-weight:500;">Early adopter offer — lock in before prices go up</span>
+        </div>
+        <div id="countdown" style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--gold);white-space:nowrap;"></div>
+      </div>
+
+      <div class="pricing-card featured" style="border-radius:0 0 16px 16px;border-top:none;">
+        <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:4px;">
+          <div class="pricing-amount">$9.99 <span>/ month</span></div>
+          <div style="font-size:15px;color:var(--muted);text-decoration:line-through;padding-bottom:6px;">$34.99/mo</div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:12px;">You save $25/month — 71% off regular price</div>
+        <div class="pricing-desc">Unlimited review requests. Pay one flat monthly fee and grow your reputation without limits.</div>
+        <ul class="pricing-features">
+          <li>Unlimited review requests</li>
+          <li>AI-generated personalized reviews</li>
+          <li>SMS & email sending</li>
+          <li>QR code generator</li>
+          <li>Review dashboard & analytics</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="btn btn-primary btn-lg" style="width:100%;margin-bottom:10px;" onclick="showView('dashboard')">Get started for $9.99/mo →</button>
+        <div style="font-size:12px;color:var(--muted);text-align:center;">Cancel anytime. Price locks in as long as you stay subscribed.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 ReviewBoost · <a href="#" style="color:var(--muted)">Terms</a> · <a href="#" style="color:var(--muted)">Privacy</a></p>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DASHBOARD
+═══════════════════════════════════════════ -->
+<div id="dashboard" class="view">
+  <div class="dash-layout">
+    <div class="dash-sidebar">
+      <div class="dash-biz-name">Sunrise Café</div>
+      <div class="dash-biz-sub">sunrise-cafe · 12 reviews this month</div>
+      <div class="dash-nav">
+        <div class="dash-nav-item active" onclick="switchTab('overview')"><span class="icon">📊</span> Overview</div>
+        <div class="dash-nav-item" onclick="switchTab('send')"><span class="icon">📨</span> Send Reviews</div>
+        <div class="dash-nav-item" onclick="switchTab('reviews')"><span class="icon">⭐</span> My Reviews</div>
+        <div class="dash-nav-item" onclick="switchTab('billing')"><span class="icon">💳</span> Billing</div>
+        <div class="dash-nav-item" onclick="switchTab('settings')"><span class="icon">⚙️</span> Settings</div>
+      </div>
+      <div style="margin-top: auto; padding-top: 32px;">
+        <button class="btn btn-ghost" style="width:100%; text-align:left; padding: 10px 12px; font-size:13px; color:var(--muted);" onclick="showView('landing')">← Back to site</button>
+      </div>
+    </div>
+
+    <div class="dash-main">
+
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title">Good morning, Alex 👋</div>
+            <div class="dash-subtitle">Here's how your reviews are doing this month.</div>
+          </div>
+          <button class="btn btn-primary" onclick="openSendModal()">+ Send review request</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Reviews posted</div>
+            <div class="stat-value">12</div>
+            <div class="stat-delta">↑ 4 from last month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Requests sent</div>
+            <div class="stat-value">31</div>
+            <div class="stat-delta">↑ 8 from last month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Conversion rate</div>
+            <div class="stat-value">39%</div>
+            <div class="stat-delta">↑ 5% from last month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg. star rating</div>
+            <div class="stat-value">4.8 ⭐</div>
+            <div class="stat-delta">↑ 0.2 from last month</div>
+          </div>
+        </div>
+
+        <div class="dash-panel">
+          <h3>Your review link</h3>
+          <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">Share this link with customers to start the review flow.</div>
+          <div class="review-link-box">
+            <input class="review-link-input" value="reviewboost.app/r/sunrise-cafe" readonly />
+            <button class="btn btn-outline" onclick="copyLink()">Copy</button>
+            <button class="btn btn-primary" onclick="openSendModal()">Send →</button>
+          </div>
+        </div>
+
+        <div class="dash-panel">
+          <h3>Recent activity</h3>
+          <div class="review-row">
+            <div>
+              <div style="font-weight:600">Maria G.</div>
+              <div style="font-size:12px;color:var(--muted)">2 hours ago</div>
+            </div>
+            <div class="review-status"><div class="status-dot posted"></div> Posted ⭐⭐⭐⭐⭐</div>
+          </div>
+          <div class="review-row">
+            <div>
+              <div style="font-weight:600">James T.</div>
+              <div style="font-size:12px;color:var(--muted)">5 hours ago</div>
+            </div>
+            <div class="review-status"><div class="status-dot pending"></div> Review generated, not posted</div>
+          </div>
+          <div class="review-row">
+            <div>
+              <div style="font-weight:600">Priya S.</div>
+              <div style="font-size:12px;color:var(--muted)">Yesterday</div>
+            </div>
+            <div class="review-status"><div class="status-dot posted"></div> Posted ⭐⭐⭐⭐⭐</div>
+          </div>
+          <div class="review-row">
+            <div>
+              <div style="font-weight:600">Daniel K.</div>
+              <div style="font-size:12px;color:var(--muted)">Yesterday</div>
+            </div>
+            <div class="review-status"><div class="status-dot sent"></div> Link sent, not opened</div>
+          </div>
+          <div class="review-row">
+            <div>
+              <div style="font-weight:600">Samantha L.</div>
+              <div style="font-size:12px;color:var(--muted)">2 days ago</div>
+            </div>
+            <div class="review-status"><div class="status-dot posted"></div> Posted ⭐⭐⭐⭐</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEND TAB -->
+      <div id="tab-send" style="display:none">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title">Send Review Requests</div>
+            <div class="dash-subtitle">Reach customers via text, email, or QR code.</div>
+          </div>
+        </div>
+        <div class="dash-panel-tabs">
+          <div class="dash-tab active" onclick="switchSendTab('sms', this)">📱 SMS</div>
+          <div class="dash-tab" onclick="switchSendTab('email', this)">📧 Email</div>
+          <div class="dash-tab" onclick="switchSendTab('qr', this)">📷 QR Code</div>
+        </div>
+        <div id="send-sms" class="dash-panel">
+          <div class="label">Customer phone number</div>
+          <input class="send-input" type="tel" placeholder="+1 (555) 000-0000" style="width:100%; margin-bottom:16px;">
+          <div class="label">Message preview</div>
+          <textarea class="send-input" style="width:100%; min-height:90px; resize:none; margin-bottom:16px;" readonly>Hi! Thanks for visiting Sunrise Café 🌅 We'd love your feedback. Leave us a quick Google review here: reviewboost.app/r/sunrise-cafe — it only takes 60 seconds!</textarea>
+          <button class="btn btn-green btn-lg" onclick="showToast('SMS sent successfully!')">Send SMS</button>
+        </div>
+        <div id="send-email" class="dash-panel" style="display:none">
+          <div class="label">Customer email</div>
+          <input class="send-input" type="email" placeholder="customer@email.com" style="width:100%; margin-bottom:16px;">
+          <div class="label">Subject line</div>
+          <input class="send-input" value="Quick favor — can you leave us a review? ⭐" style="width:100%; margin-bottom:16px;">
+          <button class="btn btn-green btn-lg" onclick="showToast('Email sent successfully!')">Send Email</button>
+        </div>
+        <div id="send-qr" class="dash-panel" style="display:none; text-align:center;">
+          <p style="font-size:14px; color:var(--muted); margin-bottom:20px;">Print or display this QR code on your counter, receipts, or table cards.</p>
+          <div style="display:flex; justify-content:center; margin-bottom:20px;">
+            <div class="qr-box" style="width:160px;height:160px;font-size:13px;">
+              📷<br>QR Code<br>reviewboost.app/r/sunrise-cafe
+            </div>
+          </div>
+          <button class="btn btn-primary btn-lg" onclick="showToast('QR code downloaded!')">Download QR Code</button>
+        </div>
+      </div>
+
+      <!-- REVIEWS TAB -->
+      <div id="tab-reviews" style="display:none">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title">My Reviews</div>
+            <div class="dash-subtitle">All reviews generated and posted through ReviewBoost.</div>
+          </div>
+        </div>
+        <div class="dash-panel">
+          <div class="review-row" style="font-size:13px; color:var(--muted); font-weight:600; padding-bottom:8px;">
+            <div>Customer</div><div>Rating</div><div>Status</div><div>Date</div>
+          </div>
+          ${[
+            ['Maria G.', '⭐⭐⭐⭐⭐', 'posted', 'Mar 24'],
+            ['Priya S.', '⭐⭐⭐⭐⭐', 'posted', 'Mar 23'],
+            ['Samantha L.', '⭐⭐⭐⭐', 'posted', 'Mar 22'],
+            ['Chris M.', '⭐⭐⭐⭐⭐', 'posted', 'Mar 21'],
+            ['Tom B.', '⭐⭐⭐⭐⭐', 'posted', 'Mar 20'],
+          ].map(([name, stars, status, date]) => `
+          <div class="review-row">
+            <div style="font-weight:600">${name}</div>
+            <div style="font-size:13px">${stars}</div>
+            <div class="review-status"><div class="status-dot ${status}"></div> ${status === 'posted' ? 'Posted' : 'Pending'}</div>
+            <div style="font-size:13px; color:var(--muted)">${date}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- BILLING TAB -->
+      <div id="tab-billing" style="display:none">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title">Billing</div>
+            <div class="dash-subtitle">Pay only for reviews that get posted.</div>
+          </div>
+        </div>
+        <div style="background:var(--green-light);border:1px solid #a8d5b8;border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">🔒</span>
+          <div><strong>Early adopter price locked in.</strong> You're paying $9.99/month — regular price is $34.99/mo. This rate stays as long as you remain subscribed.</div>
+        </div>
+        <div class="stats-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="stat-card">
+            <div class="stat-label">Current plan</div>
+            <div class="stat-value" style="font-size:22px;">$9.99<span style="font-size:14px;font-weight:400;color:var(--muted)">/mo</span></div>
+            <div class="stat-delta">Early adopter rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Next billing date</div>
+            <div class="stat-value" style="font-size:22px;">Apr 24</div>
+            <div class="stat-delta">Renews automatically</div>
+          </div>
+        </div>
+        <div class="dash-panel">
+          <h3>Payment method</h3>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <div style="background:#1a1a2e; color:#fff; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; font-family:'Syne',sans-serif;">VISA •••• 4242</div>
+            <div style="font-size:13px; color:var(--muted)">Expires 12/27</div>
+          </div>
+          <button class="btn btn-outline" onclick="showToast('Card update flow coming soon!')">Update card</button>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div id="tab-settings" style="display:none">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title">Settings</div>
+            <div class="dash-subtitle">Manage your business profile and preferences.</div>
+          </div>
+        </div>
+        <div class="dash-panel">
+          <h3>Business details</h3>
+          <div style="display:grid; gap:14px;">
+            <div>
+              <div class="label">Business name</div>
+              <input class="send-input" value="Sunrise Café" style="width:100%">
+            </div>
+            <div>
+              <div class="label">Google Business URL</div>
+              <input class="send-input" value="https://g.page/sunrise-cafe/review" style="width:100%">
+            </div>
+            <div>
+              <div class="label">Business type</div>
+              <input class="send-input" value="Coffee shop / Café" style="width:100%">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-lg" style="margin-top:20px" onclick="showToast('Settings saved!')">Save changes</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     REVIEW FLOW (Customer side)
+═══════════════════════════════════════════ -->
+<div id="reviewflow" class="view">
+  <div style="position:absolute; top:16px; left:50%; transform:translateX(-50%); font-family:'Syne',sans-serif; font-weight:800; font-size:18px; cursor:pointer;" onclick="showView('landing')">Review<span style="color:var(--gold)">Boost</span></div>
+  <div class="flow-card" style="margin-top:48px;">
+    <div class="flow-biz">
+      <div class="flow-biz-icon">☕</div>
+      <div>
+        <div class="flow-biz-name">Sunrise Café</div>
+        <div class="flow-biz-type">Coffee shop · San Francisco, CA</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Stars -->
+    <div class="flow-step active" id="fs1">
+      <div class="flow-question">How was your visit?</div>
+      <div class="flow-sub">Tap a star to rate your experience</div>
+      <div class="stars-row" id="stars-row">
+        <button class="star-btn" onclick="setStars(1)">⭐</button>
+        <button class="star-btn" onclick="setStars(2)">⭐</button>
+        <button class="star-btn" onclick="setStars(3)">⭐</button>
+        <button class="star-btn" onclick="setStars(4)">⭐</button>
+        <button class="star-btn" onclick="setStars(5)">⭐</button>
+      </div>
+      <div class="flow-nav">
+        <div class="flow-progress">
+          <div class="flow-dot done"></div>
+          <div class="flow-dot"></div>
+          <div class="flow-dot"></div>
+          <div class="flow-dot"></div>
+        </div>
+        <button class="btn btn-primary" id="next1" style="opacity:.4;pointer-events:none" onclick="goStep(2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Highlights -->
+    <div class="flow-step" id="fs2">
+      <div class="flow-question">What stood out?</div>
+      <div class="flow-sub">Select everything that applies</div>
+      <div class="flow-options">
+        <div class="flow-option" onclick="toggleOption(this)">☕ Great coffee</div>
+        <div class="flow-option" onclick="toggleOption(this)">🍞 Delicious food</div>
+        <div class="flow-option" onclick="toggleOption(this)">😊 Friendly staff</div>
+        <div class="flow-option" onclick="toggleOption(this)">🌿 Cozy atmosphere</div>
+        <div class="flow-option" onclick="toggleOption(this)">⚡ Quick service</div>
+        <div class="flow-option" onclick="toggleOption(this)">💰 Good value</div>
+      </div>
+      <div class="flow-nav">
+        <div class="flow-progress">
+          <div class="flow-dot done"></div>
+          <div class="flow-dot done"></div>
+          <div class="flow-dot"></div>
+          <div class="flow-dot"></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Extra detail -->
+    <div class="flow-step" id="fs3">
+      <div class="flow-question">Anything else to add?</div>
+      <div class="flow-sub">Optional — we'll write your review even if you skip this</div>
+      <textarea class="flow-textarea" id="extra-detail" placeholder="E.g. I had the oat latte and it was incredible…"></textarea>
+      <div class="flow-nav" style="margin-top:12px;">
+        <div class="flow-progress">
+          <div class="flow-dot done"></div>
+          <div class="flow-dot done"></div>
+          <div class="flow-dot done"></div>
+          <div class="flow-dot"></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-primary" onclick="generateReview()">Generate my review ✨</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Generated review -->
+    <div class="flow-step" id="fs4">
+      <div class="flow-question">Your review is ready!</div>
+      <div class="flow-sub">We wrote this based on your answers. Feel free to edit it.<button class="edit-btn" onclick="makeEditable()">Edit</button></div>
+      <div id="flow-loading" class="flow-loading" style="display:none">
+        <div class="spinner"></div> Writing your review with AI…
+      </div>
+      <div id="review-output" class="generated-review" contenteditable="false"></div>
+      <button class="google-btn" onclick="postToGoogle()">
+        <div class="google-g">G</div>
+        Post to Google
+      </button>
+      <div style="font-size:12px; color:var(--muted); text-align:center; margin-top:10px;">Opens Google Maps for you to paste and post</div>
+      <div class="flow-nav" style="margin-top:12px;">
+        <div class="flow-progress">
+          <div class="flow-dot done"></div>
+          <div class="flow-dot done"></div>
+          <div class="flow-dot done"></div>
+          <div class="flow-dot done"></div>
+        </div>
+        <button class="btn btn-ghost" onclick="goStep(3)">← Start over</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Thank you -->
+    <div class="flow-step" id="fs5">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Thank you so much!</div>
+      <div class="success-sub">Your review means the world to us. It helps other customers find Sunrise Café and supports our small business.</div>
+      <div style="margin-top:28px; text-align:center;">
+        <button class="btn btn-outline" onclick="resetFlow()">Leave another review</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SEND MODAL
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="send-modal">
+  <div class="modal">
+    <h3>Send review request</h3>
+    <div class="label">Customer name (optional)</div>
+    <input class="send-input" placeholder="e.g. Maria" style="width:100%; margin-bottom:14px;">
+    <div class="label">Phone or email</div>
+    <input class="send-input" placeholder="+1 555 000 0000 or email@example.com" style="width:100%; margin-bottom:4px;">
+    <div style="font-size:12px; color:var(--muted); margin-bottom:20px;">We'll send them your review link with a friendly message.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeSendModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="sendFromModal()">Send request →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--cream);padding:12px 24px;border-radius:100px;font-size:14px;font-weight:500;transition:transform .3s;z-index:999;pointer-events:none;"></div>
+
+<script>
+// ─── COUNTDOWN TIMER ─────────────────────────────
+(function() {
+  // Set deadline 72 hours from first visit, stored in sessionStorage
+  const key = 'rb_deadline';
+  let deadline = sessionStorage.getItem(key);
+  if (!deadline) {
+    deadline = Date.now() + 72 * 60 * 60 * 1000;
+    sessionStorage.setItem(key, deadline);
+  }
+  function tick() {
+    const el = document.getElementById('countdown');
+    if (!el) return;
+    const diff = parseInt(deadline) - Date.now();
+    if (diff <= 0) { el.textContent = 'Offer expired'; return; }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} left`;
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  document.getElementById('main-nav').style.display = id === 'reviewflow' ? 'none' : 'flex';
+}
+function showSection(id) {
+  showView('landing');
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+// ─── DASHBOARD TABS ───────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+  document.getElementById('tab-' + name).style.display = 'block';
+  document.querySelectorAll('.dash-nav-item').forEach(i => i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+function switchSendTab(name, el) {
+  ['sms','email','qr'].forEach(t => document.getElementById('send-'+t).style.display = 'none');
+  document.getElementById('send-'+name).style.display = 'block';
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── REVIEW FLOW ──────────────────────────────────
+let selectedStars = 0;
+let selectedOptions = [];
+
+function setStars(n) {
+  selectedStars = n;
+  const btns = document.querySelectorAll('.star-btn');
+  btns.forEach((b, i) => b.classList.toggle('lit', i < n));
+  const next = document.getElementById('next1');
+  next.style.opacity = '1';
+  next.style.pointerEvents = 'auto';
+}
+
+function toggleOption(el) {
+  el.classList.toggle('selected');
+}
+
+function goStep(n) {
+  document.querySelectorAll('.flow-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('fs'+n).classList.add('active');
+}
+
+function generateReview() {
+  goStep(4);
+  const output = document.getElementById('review-output');
+  const loading = document.getElementById('flow-loading');
+  output.style.display = 'none';
+  loading.style.display = 'flex';
+
+  const highlights = [...document.querySelectorAll('.flow-option.selected')].map(o => o.textContent.trim()).join(', ');
+  const extra = document.getElementById('extra-detail').value;
+  const starsText = ['','one star','two stars','three stars','four stars','five stars'][selectedStars] || 'five stars';
+
+  // Randomizers to force variation even with identical inputs
+  const openings = [
+    'Start with what you ordered or did there.',
+    'Start with how the place made you feel.',
+    'Start with a specific thing you noticed.',
+    'Start with why you came in.',
+    'Start with what you would tell a friend about it.',
+    'Start with something that surprised you positively.',
+  ];
+  const lengths = ['2 sentences', '3 sentences', '2-3 sentences'];
+  const tones = [
+    'casual and warm',
+    'straightforward and honest',
+    'enthusiastic but not over the top',
+    'brief and to the point',
+    'conversational, like texting a friend',
+  ];
+  const randomPick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const seed = Math.floor(Math.random() * 99999);
+
+  const prompt = `Write a genuine-sounding Google review for a coffee shop called "Sunrise Café".
+
+Customer rating: ${starsText}
+What they highlighted: ${highlights || 'a good overall experience'}
+Extra detail: "${extra || 'none'}"
+
+Rules:
+- Write exactly ${randomPick(lengths)} in first person
+- Tone: ${randomPick(tones)}
+- ${randomPick(openings)}
+- Do NOT start with "I visited", "I recently", or "I went"
+- Do NOT use the word "amazing" or "fantastic"
+- Do NOT use more than one exclamation mark total
+- Sound like a real unique person, not a template
+- Vary your sentence structure — avoid starting two sentences the same way
+- Randomness seed (just to ensure output variety): ${seed}
+
+Write only the review text, nothing else.`;
+
+  fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 200,
+      messages: [{ role: "user", content: prompt }]
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const text = data.content && data.content[0] ? data.content[0].text : "Wonderful experience at Sunrise Café — the coffee was excellent and the staff made me feel right at home. I'll definitely be back soon.";
+    loading.style.display = 'none';
+    output.style.display = 'block';
+    output.textContent = text;
+  })
+  .catch(() => {
+    loading.style.display = 'none';
+    output.style.display = 'block';
+    output.textContent = "Wonderful experience at Sunrise Café — the coffee was excellent and the staff made me feel right at home. The cozy vibe made it the perfect spot to work and unwind. Highly recommend to anyone nearby.";
+  });
+}
+
+function makeEditable() {
+  const output = document.getElementById('review-output');
+  output.contentEditable = 'true';
+  output.style.border = '1.5px solid var(--gold)';
+  output.focus();
+  showToast('Review is now editable');
+}
+
+function postToGoogle() {
+  const text = document.getElementById('review-output').textContent;
+  navigator.clipboard.writeText(text).catch(() => {});
+  showToast('Review copied! Opening Google Maps…');
+  setTimeout(() => {
+    window.open('https://search.google.com/local/writereview?placeid=ChIJ', '_blank');
+    goStep(5);
+  }, 1200);
+}
+
+function resetFlow() {
+  selectedStars = 0;
+  document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('lit'));
+  document.querySelectorAll('.flow-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('extra-detail').value = '';
+  const next1 = document.getElementById('next1');
+  next1.style.opacity = '0.4';
+  next1.style.pointerEvents = 'none';
+  goStep(1);
+}
+
+// ─── MODAL ───────────────────────────────────────
+function openSendModal() { document.getElementById('send-modal').classList.add('open'); }
+function closeSendModal() { document.getElementById('send-modal').classList.remove('open'); }
+function sendFromModal() {
+  closeSendModal();
+  showToast('Review request sent! 🎉');
+}
+
+// ─── UTILS ───────────────────────────────────────
+function copyLink() {
+  navigator.clipboard.writeText('reviewboost.app/r/sunrise-cafe').catch(() => {});
+  showToast('Link copied to clipboard!');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)'; }, 2500);
+}
+
+// Close modal on outside click
+document.getElementById('send-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSendModal();
+});
+</script>
+</body>
+</html>
